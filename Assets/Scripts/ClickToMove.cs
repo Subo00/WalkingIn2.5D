@@ -1,58 +1,45 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class ClickToMove : MonoBehaviour
 {
-    Animator animator;
-    [SerializeField] private float speed;
-    private Vector3 targetPosition;
-
+    private Animator animator;
+    private NavMeshAgent agent;
+    private bool isWalking = false;
     
 
+    
     void Start()
     {
         animator = GetComponent<Animator>();
+        agent = GetComponent<NavMeshAgent>();
     }
     void Update()
     {
-        if(Input.GetMouseButton(0))
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        RaycastHit hit;
+
+        if(Input.GetMouseButtonDown(0))
         {
-            SetTargetPosition();
+            if(Physics.Raycast(ray, out hit, 100))
+            {
+                agent.destination = hit.point;
+            }
         }
-       
-        if(animator.GetBool("isWalking"))
+        if(agent.remainingDistance <= agent.stoppingDistance)
         {
-            Rotate();
-            Move();
+            isWalking = false;
         }
-    }
-
-    void SetTargetPosition()
-    {
-        targetPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        targetPosition.z = transform.position.z;
-        targetPosition.y = transform.position.y;
-
-        animator.SetBool("isWalking",true);
-    }
-
-    void Move()
-    {
-        
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed* Time.deltaTime);
-        if(transform.position == targetPosition)
+        else
         {
-            animator.SetBool("isWalking",false);
+            isWalking = true;
         }
-    }
-    void Rotate()
-    {
-        Vector3 relativePos = targetPosition - transform.position;
 
-        // the second argument, upwards, defaults to Vector3.up
-        Quaternion rotation = Quaternion.LookRotation(relativePos, Vector3.up);
-        transform.rotation = rotation;
+        animator.SetBool("isWalking",isWalking);
     }
+
     
 }
