@@ -41,5 +41,6 @@ public class ClickToMove : MonoBehaviour
         animator.SetBool("isWalking",isWalking);
     }
 
-    
+   
+
 }
